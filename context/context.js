@@ -45,7 +45,7 @@ export const AppProvider = ({ children }) => {
         value: '15000000000000000',
         // 0.0003 ETH in Gwei
         gas: 300000,
-        gasPrice: null,
+        gasPrice: 10000000000,
       })
       updateLottery()
     } catch (err) {
@@ -58,7 +58,7 @@ export const AppProvider = ({ children }) => {
       let tx = await lotteryContract.methods.pickWinner().send({
         from: address,
         gas: 300000,
-        gasPrice: null,
+        gasPrice: 10000000000,
       })
 
       console.log(tx)
