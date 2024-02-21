@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect, useContext } from 'react'
 import Web3 from 'web3'
 import createLotteryContract from '../utils/lottery'
+import { chainInfo } from '../utils/constants'
 export const appContext = createContext()
 
 export const AppProvider = ({ children }) => {
@@ -12,6 +13,7 @@ export const AppProvider = ({ children }) => {
   const [lastWinner, setLastWinner] = useState([])
   const [lotteryId, setLotteryId] = useState()
   const [etherscanUrl, setEtherscanUrl] = useState()
+  const [ticketPrice, setTicketPrice] = useState()
 
   useEffect(() => {
     updateLottery()
@@ -29,6 +31,11 @@ export const AppProvider = ({ children }) => {
         setLotteryId(await lotteryContract.methods.lotteryId().call())
 
         setLastWinner(await lotteryContract.methods.getWinners().call())
+
+        const ticketPrice = await lotteryContract.methods.ticketPrice().call()
+        // console.log('ticketPrice', ticketPrice)
+        setTicketPrice(web3.utils.fromWei(ticketPrice, 'ether'))
+
         console.log([...lastWinner], 'Last Winners')
       } catch (error) {
         console.log(error, 'updateLottery')
@@ -37,13 +44,15 @@ export const AppProvider = ({ children }) => {
   }
 
   const enterLottery = async () => {
+    if (ethereum?.chainId !== chainInfo.chainId) {
+      alert(`Please switch chain to ${chainInfo.chainName}(${chainInfo.chainId})`)
+      return
+    }
     try {
       console.log('entering lottery')
       await lotteryContract.methods.enter().send({
         from: address,
-        // 0.015 ETH in Wei
-        value: '15000000000000000',
-        // 0.0003 ETH in Gwei
+        value: '1000000000000000',
         gas: 300000,
         gasPrice: 10000000000,
       })
@@ -114,6 +123,7 @@ export const AppProvider = ({ children }) => {
         lotteryId,
         lastWinner,
         etherscanUrl,
+        ticketPrice
       }}
     >
       {children}
